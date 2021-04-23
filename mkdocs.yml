@@ -1,0 +1,17 @@
+site_name: "instagram-graph-api-job | DataJobs"
+theme:
+  name: "material"
+  palette:
+    scheme: slate
+plugins:
+  - search
+  - mkdocstrings
+  - autorefs
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.highlight
+  - pymdownx.superfences
+nav:
+    - Home: README.md
+    - Code Reference: api.md

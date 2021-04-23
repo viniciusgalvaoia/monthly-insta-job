@@ -1,0 +1,5 @@
+pytest==6.*
+pytest-cov==2.*
+mock==4.*
+moto==2.*
+-r run.txt

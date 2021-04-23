@@ -1,0 +1,6 @@
+markdown==3.*
+mkdocs==1.*
+mkdocs-material==7.*
+pymdown-extensions==8.*
+mkdocstrings==0.*
+-r run.txt

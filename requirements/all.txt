@@ -1,0 +1,4 @@
+-r run.txt
+-r check.txt
+-r test.txt
+-r docs.txt

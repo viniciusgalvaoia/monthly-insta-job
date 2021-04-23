@@ -1,0 +1,6 @@
+flake8==3.*
+black==19.10b0
+isort==5.*
+pylint==2.*
+mypy==0.*
+pre-commit==2.*
