@@ -3,8 +3,13 @@ Main module of the monthly-insta-job project.
 
 """
 
+import configparser
 import logging
+import os
+from datetime import datetime
+from pprint import pprint
 
+import pandas as pd
 from ig_helpers import format_folder_path, get_lifetime_account_metrics, write_to_s3
 from rich.logging import RichHandler
 from rich.traceback import install
@@ -21,29 +26,44 @@ logger = logging.getLogger("main")
 
 
 if __name__ == "__main__":
+    config = configparser.ConfigParser()
+    config.read(os.path.join(os.path.realpath(".."), "setup.cfg"))
     logger.info("STARTING JOB")
-    ig_user_id = 17841411237972805
-    base = "https://graph.facebook.com/v9.0"
+    ig_user_id = config["GRAPH_API"]["IG_USER_ID"]
+    base = config["GRAPH_API"]["BASE"]
+    username = config["GRAPH_API"]["USERNAME"]
+    access_token = config["GRAPH_API"]["ACCESS_TOKEN"]
+    data_lake_bucket_name = config["S3"]["DATALAKE_BUCKET_NAME"]
     user_node = f"/{ig_user_id}"
-    access_token = ""
-    username = "vinicius.py"
-    logger.info(f"GETTING DATA FROM INSTA USERNAME: {username}")
-    data_lake_bucket_name = "insta-vags-datalake-dev"
-    config = {}
-    date_str = "2021-01-01"
+    logger.info(f"GETTING DATA FROM INSTA USERNAME: @{username}")
+    date_str = datetime.now().strftime("%Y-%m-%d")
 
     logger.info(f"REQUESTING LIFETIME METRICS ...")
+    table_names = [
+        "AudienceCity",
+        "AudienceCountry",
+        "AudienceGenderAge",
+        "AudienceLocale",
+    ]
     lifetime_account_metrics = get_lifetime_account_metrics(
         base, user_node, access_token
     )
-    logger.info(lifetime_account_metrics)
-    lifetime_account_metrics_df = lifetime_account_metrics
-    lifetime_account_metrics_bucket_name = f"{data_lake_bucket_name}/LifetimeMetrics"
-    write_to_s3(
-        lifetime_account_metrics_df,
-        format_folder_path(lifetime_account_metrics_bucket_name, date_str, logger),
-        config,
-        logger,
-    )
+    for idx, metric in enumerate(lifetime_account_metrics["data"]):
+        if idx < 4:
+            columns = [metric["name"].split("_", 1)[-1], "amount"]
+            data = {
+                metric["name"].split("_", 1)[-1]: list(
+                    metric["values"][0]["value"].keys()
+                ),
+                "amount": list(metric["values"][0]["value"].values()),
+            }
+            lifetime_account_metrics_df = pd.DataFrame.from_dict(data)
+            account_info_bucket_name = f"{data_lake_bucket_name}/{table_names[idx]}"
+            write_to_s3(
+                lifetime_account_metrics_df,
+                format_folder_path(account_info_bucket_name, date_str, logger),
+                config["AWS"],
+                logger,
+            )
 
     logger.info("END OF JOB")

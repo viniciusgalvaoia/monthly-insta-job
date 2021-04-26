@@ -42,13 +42,7 @@ def format_folder_path(table_path: str, date: str, logger) -> str:
         Returns:
             The formatted folder path, with year and month included.
         Raises:
-            UnboundLocalError: in case that the date passed as a parameter is None
-        Examples:
-            ```python
-            from job import __main__ as main
-            main.format_folder_path("s3://pd-datalake-us-east-2-dev/bi_databases/MaterialRevenue", "2021-01-01")
-            > 's3://pd-datalake-us-east-2-dev/bi_databases/MaterialRevenue/year=2021/month=1'
-            ```
+            ValueError: in case that the date passed as a parameter is None
         """
     try:
         dt = datetime.strptime(date, "%Y-%m-%d")
@@ -69,13 +63,6 @@ def write_to_s3(df: pd.DataFrame, s3_path: str, local_config: dict, logger) -> d
             Dictionary with: ‘paths’: List of all stored files paths on S3.
                              ‘partitions_values’: Dictionary of partitions added with keys as S3 path locations
                               and values as a list of partitions values as str.
-        Examples:
-            ```python
-            from job import __main__ as main
-            main.write_to_s3(material_revenue_df,
-                             "s3://pd-datalake-us-east-2-dev/bi_databases/MaterialRevenue",
-                             config)
-            ```
         """
     logger.info(f"SAVING RESULTS AT {s3_path}")
     boto3_session = boto3.Session(
