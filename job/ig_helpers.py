@@ -73,7 +73,6 @@ def write_to_s3(df: pd.DataFrame, s3_path: str, local_config: dict, logger) -> d
     return wr.s3.to_parquet(
         df=df,
         path=s3_path,
-        dtype={"Revenue": "decimal(5,2)"},  # used to force type of Revenue column
         mode="overwrite",
         dataset=True,
         boto3_session=boto3_session,
